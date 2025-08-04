@@ -1,0 +1,28 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h2>Departments</h2>
+<a href="{{ url_for('department.create_department') }}" class="btn btn-primary mb-3">Add Department</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dept in departments %}
+        <tr>
+            <td>{{ dept.id }}</td>
+            <td>{{ dept.name }}</td>
+            <td>
+                <a href="{{ url_for('department.edit_department', id=dept.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                <form method="POST" action="{{ url_for('department.delete_department', id=dept.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this department?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

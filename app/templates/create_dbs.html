@@ -1,0 +1,83 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h2>Create DBS Record</h2>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages">
+    {% for category, message in messages %}
+      {% if category == 'dbs_create' %}
+        <div class="alert alert-success flash-fade">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+    </div>
+    <style>
+    .flash-fade {
+      transition: opacity 1s;
+    }
+    </style>
+    <script>
+    setTimeout(function() {
+      var flash = document.getElementById('flash-messages');
+      if (flash) {
+        flash.style.opacity = 1;
+        flash.style.opacity = 0;
+        setTimeout(function() {
+          flash.style.display = 'none';
+        }, 1000);
+      }
+    }, 5000);
+    </script>
+  {% endif %}
+{% endwith %}
+<form method="POST">
+    <div class="mb-3">
+        <label for="employee_id">Employee ID:</label>
+        <input type="number" name="employee_id" id="employee_id" class="form-control" required autocomplete="off">
+        <div id="employee_name" class="form-text text-primary mt-2"></div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const empInput = document.getElementById('employee_id');
+        const empNameDiv = document.getElementById('employee_name');
+        empInput.addEventListener('input', function() {
+            const empId = empInput.value;
+            if (!empId) {
+                empNameDiv.textContent = '';
+                return;
+            }
+            fetch(`/employees/api/${empId}`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && data.name) {
+                        empNameDiv.textContent = data.name;
+                    } else {
+                        empNameDiv.textContent = 'Employee not found';
+                    }
+                })
+                .catch(() => {
+                    empNameDiv.textContent = 'Employee not found';
+                });
+        });
+    });
+    </script>
+    <div class="mb-3">
+        <label>Status:</label>
+        <select name="status" class="form-select" required>
+            <option value="">Select Status</option>
+            <option value="Clear">Clear</option>
+            <option value="Pending">Pending</option>
+            <option value="Flagged">Flagged</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Check Date:</label>
+        <input type="date" name="check_date" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Remarks:</label>
+        <textarea name="remarks" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Create</button>
+    <a href="#" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

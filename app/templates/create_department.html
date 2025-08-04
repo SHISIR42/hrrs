@@ -1,0 +1,38 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h2>Create Department</h2>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages">
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} flash-fade">{{ message }}</div>
+    {% endfor %}
+    </div>
+    <style>
+    .flash-fade {
+      transition: opacity 1s;
+    }
+    </style>
+    <script>
+    setTimeout(function() {
+      var flash = document.getElementById('flash-messages');
+      if (flash) {
+        flash.style.opacity = 1;
+        flash.style.opacity = 0;
+        setTimeout(function() {
+          flash.style.display = 'none';
+        }, 500);
+      }
+    }, 500);
+    </script>
+  {% endif %}
+{% endwith %}
+<form method="POST">
+    <div class="mb-3">
+        <label>Department Name:</label>
+        <input type="text" name="name" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Create</button>
+    <a href="{{ url_for('department.list_department') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

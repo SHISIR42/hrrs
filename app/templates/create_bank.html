@@ -1,0 +1,97 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h2>Add Bank Details</h2>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages">
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} flash-fade">{{ message }}</div>
+    {% endfor %}
+    </div>
+    <style>
+    .flash-fade {
+      transition: opacity 1s;
+    }
+    </style>
+    <script>
+    setTimeout(function() {
+      var flash = document.getElementById('flash-messages');
+      if (flash) {
+        flash.style.opacity = 1;
+        flash.style.opacity = 0;
+        setTimeout(function() {
+          flash.style.display = 'none';
+        }, 500);
+      }
+    }, 500);
+    </script>
+  {% endif %}
+{% endwith %}
+<form method="POST">
+    <div class="mb-3">
+        <label for="employee_id">Employee ID:</label>
+        <input type="number" name="employee_id" id="employee_id" class="form-control" required autocomplete="off">
+        <div id="employee_name" class="form-text text-primary mt-2"></div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const empInput = document.getElementById('employee_id');
+        const empNameDiv = document.getElementById('employee_name');
+        empInput.addEventListener('input', function() {
+            const empId = empInput.value;
+            if (!empId) {
+                empNameDiv.textContent = '';
+                return;
+            }
+            fetch(`/employees/api/${empId}`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && data.name) {
+                        empNameDiv.textContent = data.name;
+                    } else {
+                        empNameDiv.textContent = 'Employee not found';
+                    }
+                })
+                .catch(() => {
+                    empNameDiv.textContent = 'Employee not found';
+                });
+        });
+    });
+    </script>
+    <div class="mb-3">
+        
+        <label>Bank Name:<span style="color:red">*</span></label>
+        <input type="text" name="bank_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Account Number:<span style="color:red">*</span></label>
+        <input type="text" name="account_number" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label>Sort Code:<span style="color:red">*</span></label>
+        <input type="text" name="sort_code" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>BIC:</label>
+        <input type="text" name="bic" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label>Verification Status:<span style="color:red">*</span></label>
+        <select name="verification_status" class="form-control" required>
+            <option value="Verified">Verified</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Verification Date:</label>
+        <input type="date" name="verification_date" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label>Remarks:</label>
+        <textarea name="remarks" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Add Bank Details</button>
+    <a href="#" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

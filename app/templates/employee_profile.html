@@ -1,0 +1,52 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<h2>Employee Profile</h2>
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">{{ employee.name }}</h5>
+    <p class="card-text"><strong>Email:</strong> {{ employee.email }}</p>
+    <p class="card-text"><strong>Department:</strong> {{ employee.department.name if employee.department else '' }}</p>
+    <p class="card-text"><strong>NI Number:</strong> {{ employee.ni_number }}</p>
+    <p class="card-text"><strong>Phone:</strong> {{ employee.phone_number }}</p>
+    <p class="card-text"><strong>Address:</strong> {{ employee.address }}</p>
+    <p class="card-text"><strong>Date of Birth:</strong> {{ employee.date_of_birth }}</p>
+  </div>
+</div>
+
+<h4>Compliance Reports</h4>
+<div id="compliance-reports">
+  <p>Loading compliance data...</p>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  fetch("{{ url_for('employee.get_employee_compliances', id=employee.id) }}")
+    .then(res => res.json())
+    .then(data => {
+      let html = '';
+      html += '<h5>DBS</h5>';
+      if (data.dbs && data.dbs.length) {
+        html += '<ul>' + data.dbs.map(r => {
+          let updateUrl = `/dbs/update/${r.id}`;
+          return `<li>Status: ${r.status}, Date: ${r.check_date || ''}, Certificate: ${r.certificate_number || ''}, Remarks: ${r.remarks || ''} <a href="${updateUrl}" title="Update DBS"><i class="bi bi-pencil-square"></i></a></li>`;
+        }).join('') + '</ul>';
+      } else {
+        html += '<p>No DBS records.</p>';
+      }
+      html += '<h5>Bank</h5>';
+      if (data.bank && data.bank.length) {
+        html += '<ul>' + data.bank.map(r => {
+          let date = r.check_date ? r.check_date.split('T')[0] : '';
+          let updateUrl = `/bank/update/${r.id}`;
+          return `<li>Status: ${r.status || ''}, Account: ${r.account_number || ''}, Date: ${date}, Remarks: ${r.remarks || ''} <a href="${updateUrl}" title="Update Bank"><i class="bi bi-pencil-square"></i></a></li>`;
+        }).join('') + '</ul>';
+      } else {
+        html += '<p>No Bank records.</p>';
+      }
+      document.getElementById('compliance-reports').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('compliance-reports').innerHTML = '<p>Could not load compliance data.</p>';
+    });
+});
+</script>
+{% endblock %}

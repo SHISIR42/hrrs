@@ -1,0 +1,78 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <h1>Employees</h1>
+   
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} flash-fade">{{ message }}</div>
+        {% endfor %}
+        </div>
+        <style>
+        .flash-fade {
+          transition: opacity 1s;
+        }
+        </style>
+        <script>
+        setTimeout(function() {
+          var flash = document.getElementById('flash-messages');
+          if (flash) {
+            flash.style.opacity = 1;
+            flash.style.opacity = 0;
+            setTimeout(function() {
+              flash.style.display = 'none';
+            }, 500);
+          }
+        }, 500);
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Email</th><th>NI Number</th><th>Phone Number</th><th>Department</th><th>Date of Birth</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td>{{ emp.id }}</td>
+                <td>{{ emp.name }}</td>
+                <td>{{ emp.email }}</td>
+                <td>{{ emp.ni_number }}</td>
+                <td>{{ emp.phone_number }}</td>
+                <td>{{ emp.department.name if emp.department else '' }}</td>
+                <td>{{ emp.date_of_birth }}</td>
+                <td>
+                    <a href="{{ url_for('employee.employee_profile', id=emp.id) }}" class="btn btn-info btn-sm">Profile</a>
+                    <a href="{{ url_for('employee.update_employee', id=emp.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ emp.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal{{ emp.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ emp.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="deleteModalLabel{{ emp.id }}">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to delete <strong>{{ emp.name }}</strong>?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('employee.delete_employee', id=emp.id) }}" method="POST" style="display:inline;">
+                              <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
