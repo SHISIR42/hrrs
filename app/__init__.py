@@ -12,6 +12,8 @@ def create_app():
     app = Flask(__name__)
     from config import Config
     app.config.from_object(Config)
+    from app.routes.compliance_api import compliance_api
+    app.register_blueprint(compliance_api)
 
     CORS(app)
     db.init_app(app)
@@ -25,15 +27,15 @@ def create_app():
     app.register_blueprint(department_bp, url_prefix="/departments")
     from app.routes.dbs_api import dbs_api
     from app.routes.dbs_web import web_dbs_bp
-    #from app.routes.home_office_api import home_office_api
+    from app.routes.home_office_api import home_office_api
     from app.routes.bank_api import bank_api
-    #from app.routes.credit_agency_api import credit_agency_api
+    from app.routes.credit_agency_api import credit_agency_api
     from app.routes.bank_web import bank_web_bp
     app.register_blueprint(dbs_api)
     app.register_blueprint(web_dbs_bp)
-    #app.register_blueprint(home_office_api)
+    app.register_blueprint(home_office_api)
     app.register_blueprint(bank_api)
-    #app.register_blueprint(credit_agency_api)
+    app.register_blueprint(credit_agency_api)
     app.register_blueprint(bank_web_bp)
 
     # Dashboard route

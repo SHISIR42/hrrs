@@ -6,17 +6,33 @@ from datetime import datetime
 
 bank_web_bp = Blueprint('bank_web', __name__)
 
+
+ # Duplicate import statements removed
+
+@bank_web_bp.route('/bank/edit/<int:bank_id>', methods=['GET'])
+def edit_bank(bank_id):
+    bank = Bank.query.get_or_404(bank_id)
+    return render_template('edit_bank.html', bank=bank)
+
+@bank_web_bp.route('/bank/update/<int:bank_id>', methods=['POST'])
+def update_bank(bank_id):
+    bank = Bank.query.get_or_404(bank_id)
+    bank.bank_name = request.form.get('bank_name')
+    bank.account_number = request.form.get('account_number')
+    bank.sort_code = request.form.get('sort_code')
+    bank.bic = request.form.get('bic')
+    bank.verification_status = request.form.get('verification_status')
+    verification_date = request.form.get('verification_date')
+    bank.verification_date = datetime.strptime(verification_date, '%Y-%m-%d') if verification_date else None
+    bank.remarks = request.form.get('remarks')
+    db.session.commit()
+    flash('Bank record updated successfully!', 'success')
+    return redirect(url_for('employee.employee_profile', id=bank.employee_id))
+
 @bank_web_bp.route('/bank/list')
 def list_banks():
     banks = Bank.query.all()
     return render_template('list_bank.html', banks=banks)
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models.employee import Employee
-from app.models.bank import Bank
-from app import db
-from datetime import datetime
-
-bank_web_bp = Blueprint('bank_web', __name__)
 
 @bank_web_bp.route('/bank/create', methods=['GET', 'POST'])
 def create_bank():

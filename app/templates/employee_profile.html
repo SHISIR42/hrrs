@@ -1,52 +1,137 @@
 {% extends "dashboard.html" %}
 {% block content %}
-<h2>Employee Profile</h2>
-<div class="card mb-4">
-  <div class="card-body">
-    <h5 class="card-title">{{ employee.name }}</h5>
-    <p class="card-text"><strong>Email:</strong> {{ employee.email }}</p>
-    <p class="card-text"><strong>Department:</strong> {{ employee.department.name if employee.department else '' }}</p>
-    <p class="card-text"><strong>NI Number:</strong> {{ employee.ni_number }}</p>
-    <p class="card-text"><strong>Phone:</strong> {{ employee.phone_number }}</p>
-    <p class="card-text"><strong>Address:</strong> {{ employee.address }}</p>
-    <p class="card-text"><strong>Date of Birth:</strong> {{ employee.date_of_birth }}</p>
+
+
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card shadow-lg border-0 rounded-4 mb-4" style="background: #f4f7fa; border-left: 8px solid #223354;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="rounded-circle d-flex justify-content-center align-items-center me-4" style="width:80px;height:80px;font-size:3rem;background: #223354; color: #fbddf0; box-shadow:0 2px 8px #22335433;">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+              <h2 class="card-title mb-0" style="font-weight:700;letter-spacing:1px;font-size:2.2rem;color:#223354;">{{ employee.name }}</h2>
+              <span class="badge" style="background:#fbddf0;color:#7a2c6a;font-size:1rem;">{{ employee.department.name if employee.department else 'No Department' }}</span>
+            </div>
+          </div>
+          <hr style="border-color:#e0e7ef;">
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-3"><i class="bi bi-envelope me-2" style="color:#7a2c6a;"></i> <strong>Email:</strong> <span style="color:#223354;">{{ employee.email }}</span></li>
+                <li class="mb-3"><i class="bi bi-credit-card-2-front me-2" style="color:#7a2c6a;"></i> <strong>NI Number:</strong> <span style="color:#223354;">{{ employee.ni_number }}</span></li>
+                <li class="mb-3"><i class="bi bi-telephone me-2" style="color:#7a2c6a;"></i> <strong>Phone:</strong> <span style="color:#223354;">{{ employee.phone_number }}</span></li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-3"><i class="bi bi-geo-alt me-2" style="color:#7a2c6a;"></i> <strong>Address:</strong> <span style="color:#223354;">{{ employee.address }}</span></li>
+                <li class="mb-3"><i class="bi bi-calendar-date me-2" style="color:#7a2c6a;"></i> <strong>Date of Birth:</strong> <span style="color:#223354;">{{ employee.date_of_birth }}</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<h4>Compliance Reports</h4>
-<div id="compliance-reports">
-  <p>Loading compliance data...</p>
-</div>
+<div class="container-fluid py-2">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card shadow border-0 rounded-4 mb-4" style="background: #f4f7fa; border-left: 8px solid #223354;">
+        <div class="card-body p-4">
+          <h4 class="mb-4" style="font-weight:600;letter-spacing:1px;color:#223354;">Compliance Reports</h4>
+          <div id="compliance-reports">
+            <p>Loading compliance data...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   fetch("{{ url_for('employee.get_employee_compliances', id=employee.id) }}")
     .then(res => res.json())
     .then(data => {
       let html = '';
-      html += '<h5>DBS</h5>';
+      // DBS Section
+      html += '<div class="mb-4">';
+      html += '<h5 class="mb-3"><i class="bi bi-shield-lock text-primary me-2"></i>DBS Records</h5>';
       if (data.dbs && data.dbs.length) {
-        html += '<ul>' + data.dbs.map(r => {
-          let updateUrl = `/dbs/update/${r.id}`;
-          return `<li>Status: ${r.status}, Date: ${r.check_date || ''}, Certificate: ${r.certificate_number || ''}, Remarks: ${r.remarks || ''} <a href="${updateUrl}" title="Update DBS"><i class="bi bi-pencil-square"></i></a></li>`;
-        }).join('') + '</ul>';
+        html += data.dbs.map(r => {
+          let updateUrl = `{{ url_for('web_dbs.update_dbs', dbs_id=0) }}`.replace('/0', `/${r.id}`);
+          let deleteUrl = `{{ url_for('web_dbs.delete_dbs', dbs_id=0) }}`.replace('/0', `/${r.id}`);
+          return `
+            <div class=\"border rounded-3 p-3 mb-3 bg-white shadow-sm\">
+              <div class=\"d-flex justify-content-between align-items-center\">
+                <div>
+                  <span class="badge ${r.status === 'Clear' || r.status === 'Clear' ? 'bg-success' : r.status === 'Pending' ? 'bg-warning text-dark' : (r.status === 'Flagged' || r.status === 'Expired' ? 'bg-danger' : 'bg-secondary')} me-2">${r.status}</span>
+                  <strong>Certificate:</strong> ${r.certificate_number || ''}
+                </div>
+                <div>
+                  <a href=\"${updateUrl}\" class=\"btn btn-sm btn-outline-primary me-2\" title=\"Edit\"><i class=\"bi bi-pencil-square\"></i></a>
+                    <form method="POST" action="${deleteUrl}" style="display:inline;" onsubmit="return animateDelete(this, 'DBS');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+              </div>
+              <div class=\"mt-2\"><i class=\"bi bi-calendar-date text-primary me-1\"></i> <strong>Date:</strong> ${r.check_date || ''}</div>
+              <div><i class=\"bi bi-chat-left-text text-primary me-1\"></i> <strong>Remarks:</strong> ${r.remarks || ''}</div>
+            </div>
+          `;
+        }).join('');
       } else {
-        html += '<p>No DBS records.</p>';
+        html += '<p class="text-muted">No DBS records.</p>';
       }
-      html += '<h5>Bank</h5>';
+      html += '</div>';
+      // Bank Section
+      html += '<div class="mb-4">';
+      html += '<h5 class="mb-3"><i class="bi bi-bank text-primary me-2"></i>Bank Records</h5>';
       if (data.bank && data.bank.length) {
-        html += '<ul>' + data.bank.map(r => {
+        html += data.bank.map(r => {
           let date = r.check_date ? r.check_date.split('T')[0] : '';
-          let updateUrl = `/bank/update/${r.id}`;
-          return `<li>Status: ${r.status || ''}, Account: ${r.account_number || ''}, Date: ${date}, Remarks: ${r.remarks || ''} <a href="${updateUrl}" title="Update Bank"><i class="bi bi-pencil-square"></i></a></li>`;
-        }).join('') + '</ul>';
+          let updateUrl = `/bank/edit/${r.id}`;
+          let deleteUrl = `/bank/delete/${r.id}`;
+          return `
+            <div class=\"border rounded-3 p-3 mb-3 bg-white shadow-sm\">
+              <div class=\"d-flex justify-content-between align-items-center\">
+                <div>
+                  <span class="badge ${r.status === 'Verified' || r.status === 'Valid' ? 'bg-success' : r.status === 'Pending' ? 'bg-warning text-dark' : (r.status === 'Flagged' || r.status === 'Expired' ? 'bg-danger' : 'bg-info')} me-2">${r.status || ''}</span>
+                  <strong>Account:</strong> ${r.account_number || ''}
+                </div>
+                <div>
+                  <a href=\"${updateUrl}\" class=\"btn btn-sm btn-outline-primary me-2\" title=\"Edit\"><i class=\"bi bi-pencil-square\"></i></a>
+                  <a href=\"${deleteUrl}\" class=\"btn btn-sm btn-outline-danger\" title=\"Delete\" onclick=\"return confirm('Delete this Bank record?');\"><i class=\"bi bi-trash\"></i></a>
+                </div>
+              </div>
+              <div class=\"mt-2\"><i class=\"bi bi-calendar-date text-primary me-1\"></i> <strong>Date:</strong> ${date}</div>
+              <div><i class=\"bi bi-chat-left-text text-primary me-1\"></i> <strong>Remarks:</strong> ${r.remarks || ''}</div>
+            </div>
+          `;
+        }).join('');
       } else {
-        html += '<p>No Bank records.</p>';
+        html += '<p class="text-muted">No Bank records.</p>';
       }
+      html += '</div>';
       document.getElementById('compliance-reports').innerHTML = html;
     })
     .catch(() => {
       document.getElementById('compliance-reports').innerHTML = '<p>Could not load compliance data.</p>';
     });
 });
+function animateDelete(form, type) {
+  if (!confirm('Delete this ' + type + ' record?')) return false;
+  const card = form.closest('.border.rounded-3');
+  if (card) {
+    card.style.transition = 'opacity 0.5s';
+    card.style.opacity = 0;
+    setTimeout(() => form.submit(), 500);
+    return false;
+  }
+  return true;
+}
 </script>
 {% endblock %}

@@ -52,19 +52,37 @@
       <li class="nav-item mb-1">
         <a class="nav-link text-white d-flex align-items-center" href="#home-office"><span class="me-2"><i class="bi bi-house-door"></i></span> Home Office</a>
       </li>
-      <li class="nav-item mb-1">
-        <a class="nav-link text-white d-flex align-items-center disabled" tabindex="-1" aria-disabled="true">
-          <span class="me-2"><i class="bi bi-credit-card"></i></span> Credit Agency
-        </a>
-      </li>
     </ul>
-    
   </div>
 </nav>
 {% endblock %}
 {% block content %}
-<div class="container py-4">
-  <h2>Welcome to the RCL HRRS Dashboard</h2>
-  <p>Select an option from the sidebar to get started.</p>
+<div class="container mt-4">
+  <h2 class="mb-4">Update DBS Record</h2>
+  <form method="POST" action="{{ url_for('web_dbs.update_dbs', dbs_id=dbs.id) }}">
+    <div class="mb-3">
+      <label for="dbs_number" class="form-label">DBS Number</label>
+      <input type="text" class="form-control" id="dbs_number" name="dbs_number" value="{{ dbs.certificate_number }}" readonly required>
+    </div>
+    <div class="mb-3">
+      <label for="issue_date" class="form-label">Issue Date</label>
+      <input type="date" class="form-control" id="issue_date" name="issue_date" value="{{ dbs.check_date.strftime('%Y-%m-%d') if dbs.check_date else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="status" class="form-label">Status</label>
+      <select class="form-select" id="status" name="status" required>
+        <option value="Clear" {% if dbs.status == 'Clear' %}selected{% endif %}>Clear</option>
+        <option value="Pending" {% if dbs.status == 'Pending' %}selected{% endif %}>Pending</option>
+        <option value="Flagged" {% if dbs.status == 'Flagged' %}selected{% endif %}>Flagged</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="remarks" class="form-label">Remarks</label>
+      <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ dbs.remarks }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ url_for('employee.employee_profile', id=dbs.employee_id) }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
 </div>
 {% endblock %}

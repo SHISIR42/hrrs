@@ -16,23 +16,13 @@ def get_employee_compliances(id):
         {'id': r.id, 'status': r.status, 'check_date': r.check_date.isoformat() if r.check_date else None, 'certificate_number': getattr(r, 'certificate_number', None), 'remarks': r.remarks}
         for r in DBS.query.filter_by(employee_id=id).all()
     ]
-    home_office = [
-        {'id': r.id, 'status': r.status, 'check_date': r.check_date.isoformat() if r.check_date else None, 'reference_number': r.reference_number, 'remarks': r.remarks}
-        for r in HomeOffice.query.filter_by(employee_id=id).all()
-    ]
     bank = [
         {'id': r.id, 'status': r.verification_status, 'check_date': r.verification_date.isoformat() if r.verification_date else None, 'account_number': r.account_number, 'remarks': r.remarks}
         for r in Bank.query.filter_by(employee_id=id).all()
     ]
-    credit_agency = [
-        {'id': r.id, 'status': r.status, 'check_date': r.check_date.isoformat() if r.check_date else None, 'reference_number': r.reference_number, 'remarks': r.remarks}
-        for r in CreditAgency.query.filter_by(employee_id=id).all()
-    ]
     return {
         'dbs': dbs,
-        'home_office': home_office,
-        'bank': bank,
-        'credit_agency': credit_agency
+        'bank': bank
     }
 
 # API: Get employee by ID (for live search)

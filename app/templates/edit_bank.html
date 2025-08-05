@@ -1,14 +1,4 @@
 {% extends "base.html" %}
-{% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-dark" style="background: #223354; min-height: 60px;">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('dashboard') }}">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height:48px;width:auto;margin-right:12px;" />
-      <span style="font-size: 2rem; color: #ffffff;letter-spacing: 2px; text-shadow: 1px 1px 4px #223354; margin-left: 8px;">RCL HRRS</span>
-    </a>
-  </div>
-</nav>
-{% endblock %}
 {% block sidebar %}
 <nav class="col-md-2 d-none d-md-block sidebar p-0" style="background: #1a2332; min-height: calc(100vh - 60px);">
   <div class="d-flex flex-column align-items-center pt-4" style="height: 100%;">
@@ -58,13 +48,57 @@
         </a>
       </li>
     </ul>
-    
+  </div>
+</nav>
+{% endblock %}
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: #223354; min-height: 60px;">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('dashboard') }}">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height:48px;width:auto;margin-right:12px;" />
+      <span style="font-size: 2rem; color: #ffffff;letter-spacing: 2px; text-shadow: 1px 1px 4px #223354; margin-left: 8px;">RCL HRRS</span>
+    </a>
   </div>
 </nav>
 {% endblock %}
 {% block content %}
-<div class="container py-4">
-  <h2>Welcome to the RCL HRRS Dashboard</h2>
-  <p>Select an option from the sidebar to get started.</p>
+<div class="container mt-4">
+  <h2 class="mb-4">Update Bank Record</h2>
+  <form method="POST" action="{{ url_for('bank_web.update_bank', bank_id=bank.id) }}">
+    <div class="mb-3">
+      <label for="bank_name" class="form-label">Bank Name</label>
+      <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ bank.bank_name }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="account_number" class="form-label">Account Number</label>
+      <input type="text" class="form-control" id="account_number" name="account_number" value="{{ bank.account_number }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="sort_code" class="form-label">Sort Code</label>
+      <input type="text" class="form-control" id="sort_code" name="sort_code" value="{{ bank.sort_code }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="bic" class="form-label">BIC</label>
+      <input type="text" class="form-control" id="bic" name="bic" value="{{ bank.bic }}">
+    </div>
+    <div class="mb-3">
+      <label for="verification_status" class="form-label">Verification Status</label>
+      <select class="form-select" id="verification_status" name="verification_status" required>
+        <option value="Verified" {% if bank.verification_status == 'Verified' %}selected{% endif %}>Verified</option>
+        <option value="Pending" {% if bank.verification_status == 'Pending' %}selected{% endif %}>Pending</option>
+        <option value="Failed" {% if bank.verification_status == 'Failed' %}selected{% endif %}>Failed</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="verification_date" class="form-label">Verification Date</label>
+      <input type="date" class="form-control" id="verification_date" name="verification_date" value="{{ bank.verification_date.strftime('%Y-%m-%d') if bank.verification_date else '' }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="remarks" class="form-label">Remarks</label>
+      <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ bank.remarks }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ url_for('employee.employee_profile', id=bank.employee_id) }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
 </div>
 {% endblock %}
